@@ -10,10 +10,11 @@ use Pterodactyl\Repositories\Wings\DaemonFileRepository;
 class OpenFolderSizeService
 {
     private const CACHE_TTL_SECONDS = 300;
+    private DaemonFileRepository $files;
 
-    public function __construct(
-        private DaemonFileRepository $files,
-    ) {
+    public function __construct(DaemonFileRepository $files)
+    {
+        $this->files = $files;
     }
 
     public function get(Server $server, string $path, bool $refresh = false): array
@@ -51,7 +52,15 @@ class OpenFolderSizeService
         $repository = $this->files->setServer($server);
 
         while (($current = array_pop($queue)) !== null) {
-            $entries = $repository->getDirectory($current);
+            try {
+                $entries = $repository->getDirectory($current);
+            } catch (\Throwable $exception) {
+                if ($current === $path) {
+                    throw $exception;
+                }
+
+                continue;
+            }
 
             foreach ($entries as $entry) {
                 $name = (string) Arr::get($entry, 'name', '');
@@ -93,8 +102,11 @@ class OpenFolderSizeService
 
     private function normalizePath(string $path): string
     {
+        $path = trim(str_replace('\\', '/', $path));
+        $path = preg_replace('/^[~$]+(?=\/|$)/', '', $path) ?? $path;
+
         $segments = array_filter(
-            explode('/', str_replace('\\', '/', trim($path))),
+            explode('/', $path),
             static fn (string $segment): bool => $segment !== '' && $segment !== '.'
         );
 
@@ -115,6 +127,6 @@ class OpenFolderSizeService
     {
         $directory = $directory === '/' ? '' : rtrim($directory, '/');
 
-        return $directory . '/' . ltrim($name, '/');
+        return $this->normalizePath($directory . '/' . ltrim($name, '/'));
     }
 }

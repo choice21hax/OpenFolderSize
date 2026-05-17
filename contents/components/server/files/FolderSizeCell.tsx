@@ -63,6 +63,8 @@ const FolderSizeCell = ({ serverUuid, path }: Props) => {
     }
 
     if (status === 'loading') {
+        const title = 'Calculating file size';
+
         return (
             <button
                 type="button"
@@ -70,32 +72,36 @@ const FolderSizeCell = ({ serverUuid, path }: Props) => {
                 data-state="loading"
                 onClick={stopRowNavigation}
                 aria-disabled="true"
+                aria-label={title}
+                title={title}
             >
                 <FontAwesomeIcon icon={faSpinner} spin />
-                <span>Calculating</span>
             </button>
         );
     }
 
     if (status === 'error') {
+        const title = error ? `Retry calculating file size: ${error}` : 'Retry calculating file size';
+
         return (
             <button
                 type="button"
                 className="ofs-size-button"
                 data-state="error"
                 onClick={calculate}
-                title={error ?? 'Unable to calculate directory size.'}
+                aria-label={title}
+                title={title}
             >
                 <FontAwesomeIcon icon={faExclamationTriangle} />
-                <span>Retry</span>
             </button>
         );
     }
 
+    const title = 'Calculate file size';
+
     return (
-        <button type="button" className="ofs-size-button" onClick={calculate}>
+        <button type="button" className="ofs-size-button" onClick={calculate} aria-label={title} title={title}>
             <FontAwesomeIcon icon={faCalculator} />
-            <span>Calculate</span>
         </button>
     );
 };

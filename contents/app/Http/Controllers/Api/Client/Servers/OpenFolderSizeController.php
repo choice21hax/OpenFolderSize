@@ -9,10 +9,12 @@ use Pterodactyl\BlueprintFramework\Extensions\openfoldersize\Http\Requests\Api\C
 
 class OpenFolderSizeController extends ClientApiController
 {
-    public function __construct(
-        private OpenFolderSizeService $service,
-    ) {
+    private OpenFolderSizeService $service;
+
+    public function __construct(OpenFolderSizeService $service)
+    {
         parent::__construct();
+        $this->service = $service;
     }
 
     public function __invoke(GetDirectorySizeRequest $request, Server $server): array
@@ -21,8 +23,8 @@ class OpenFolderSizeController extends ClientApiController
 
         return $this->service->get(
             $server,
-            $request->string('path')->toString(),
-            $request->boolean('refresh')
+            (string) $request->input('path', '/'),
+            filter_var($request->input('refresh', false), FILTER_VALIDATE_BOOLEAN)
         );
     }
 }

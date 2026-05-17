@@ -15,4 +15,6 @@ It adds an on-demand folder size calculator to the client file manager. Director
 
 - No custom Wings patch is required for the core feature.
 - Optional Wings tuning guidance ships with the extension manual.
+- The file-manager control is icon-only, inherits the active panel theme, and normalizes Nebula-style root paths such as `$/...`.
+- The PHP request/controller layer avoids newer-only helpers to stay friendlier with older panel stacks.
 - `contents/conf.yml` targets Blueprint `beta-2026-01`.

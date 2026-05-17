@@ -10,7 +10,7 @@
           Blueprint-powered Pterodactyl panels.
         </p>
         <ul>
-          <li>Directories get a Calculate control in the same size column used by files.</li>
+          <li>Directories get an icon-only calculate control in the same size column used by files.</li>
           <li>Requests are queued per server and cached for five minutes to avoid duplicate Wings load.</li>
           <li>No custom Wings patch is required for the core feature.</li>
           <li>Operational notes are installed to <code>{root/data}/docs/MANUALWINGS.md</code>.</li>

@@ -3,7 +3,7 @@ info:
   identifier: "openfoldersize"
   description: "Adds on-demand folder size calculation to the Pterodactyl file manager."
   flags: ""
-  version: "2.1.5"
+  version: "2.2.0"
   target: "beta-2026-01"
   author: "choice21"
   icon: ""

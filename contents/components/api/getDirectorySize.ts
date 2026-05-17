@@ -15,7 +15,27 @@ const responseCache = new Map<string, DirectorySizeResult>();
 const pendingRequests = new Map<string, Promise<DirectorySizeResult>>();
 const serverQueues = new Map<string, Promise<unknown>>();
 
-const createCacheKey = (serverUuid: string, path: string) => `${serverUuid}:${path}`;
+const normalizePath = (path: string): string => {
+    const strippedPath = path.replace(/\\/g, '/').trim().replace(/^[~$]+(?=\/|$)/, '');
+    const normalizedSegments = strippedPath
+        .split('/')
+        .filter((segment) => segment !== '' && segment !== '.')
+        .reduce<string[]>((segments, segment) => {
+            if (segment === '..') {
+                segments.pop();
+
+                return segments;
+            }
+
+            segments.push(segment);
+
+            return segments;
+        }, []);
+
+    return normalizedSegments.length ? `/${normalizedSegments.join('/')}` : '/';
+};
+
+const createCacheKey = (serverUuid: string, path: string) => `${serverUuid}:${normalizePath(path)}`;
 
 const enqueueServerRequest = <T,>(serverUuid: string, task: () => Promise<T>): Promise<T> => {
     const active = serverQueues.get(serverUuid) ?? Promise.resolve();
@@ -37,7 +57,8 @@ export const getCachedDirectorySize = (serverUuid: string, path: string): Direct
     responseCache.get(createCacheKey(serverUuid, path));
 
 export default async (serverUuid: string, path: string): Promise<DirectorySizeResult> => {
-    const cacheKey = createCacheKey(serverUuid, path);
+    const normalizedPath = normalizePath(path);
+    const cacheKey = createCacheKey(serverUuid, normalizedPath);
     const cached = responseCache.get(cacheKey);
     if (cached) {
         return cached;
@@ -52,7 +73,7 @@ export default async (serverUuid: string, path: string): Promise<DirectorySizeRe
         const { data } = await http.get<DirectorySizeResult>(
             `/api/client/extensions/openfoldersize/servers/${serverUuid}/directory-size`,
             {
-                params: { path },
+                params: { path: normalizedPath },
             }
         );
 
